@@ -10,8 +10,7 @@ on:
   release:
     types:
       - published
-      - created
-      - draft
+      - prereleased
   push:
     tags:
       - 'v*'
@@ -163,7 +162,7 @@ jobs:
 
   publish-to-testpypi:
     name: Publish to TestPyPI
-    if: github.event_name == 'release' && github.event.action == 'draft'
+    if: github.event_name == 'release' && github.event.action == 'prereleased'
     needs:
       - build-internal
       - sdist
