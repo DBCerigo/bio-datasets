@@ -41,6 +41,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
           python build_cython.py
+          # Check if .so file exists and exit with error if not found
+          if ! ls src/bio_datasets/structure/pdbx/encoding*.so; then
+            echo "Error: encoding.so file not found after Cython build"
+            exit 1
+          fi
       - name: Get current CCD for hashing
         run: wget -P ./src/bio_datasets/structure/library/ https://files.wwpdb.org/pub/pdb/data/monomers/components.cif.gz
       - name: Get current CCD frequency file for hashing
