@@ -51,14 +51,14 @@ To illustrate, we provide examples of datasets pre-configured with Bio Datasets 
 from bio_datasets import load_dataset
 
 dataset = load_dataset(
-    "biodatasets/pdb",
-    split="train",
+   "biodatasets/afdb_e_coli",
+   name="array",
 )
 ex = dataset[0]
-print(type(ex["structure"]))  # a dict with keys `id` and `structure` (a `biotite.structure.AtomArray`)
+print(type(ex['structure']))
 ```
 ```
-biotite.structure.AtomArray
+bio_datasets.structure.protein.ProteinChain
 ```
 
 #### Protein structure data (e.g. from afdb)
