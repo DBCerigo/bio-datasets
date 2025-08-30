@@ -20,7 +20,10 @@ def load_coords(
     disable_tqdm: bool = False,
     split_ids: Optional[Dict[str, List[str]]] = None,
 ):
-    """Split-specific jsonl files should be created by running data_creation_scripts/create_cath_splits.py"""
+    """Split-specific jsonl files.
+
+    Should be created by running data_creation_scripts/create_cath_splits.py
+    """
     entries_by_split = {split: [] for split in split_ids.keys()}
     name_to_split = {name: split for split, names in split_ids.items() for name in names}
     with open(jsonl_file) as f:

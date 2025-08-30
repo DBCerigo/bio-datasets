@@ -134,7 +134,10 @@ def encode_biotite_atom_array(
     name: Optional[str] = None,  # just for foldcomp
     file_type: str = "pdb",
 ) -> bytes:
-    """Encode a biotite AtomArray to file_type (pdb/cif/bcif) -formatted bytes, optionally compressing with foldcomp."""
+    """Encode a biotite AtomArray to file_type (pdb/cif/bcif) -formatted bytes.
+
+    Optionally compressing with foldcomp.
+    """
     if encode_with_foldcomp or file_type == "pdb":
         assert file_type == "pdb", "foldcomp only supported for pdb"
         return _pdb_encode_biotite_atom_array(array, encode_with_foldcomp, name)
@@ -317,7 +320,8 @@ class AtomArrayFeature(CustomFeature):
     This feature stores the array directly as a pa struct (basically a dictionary of arrays),
     as defined in the AtomArrayExtensionType.
 
-    Input: The AtomArrayFeature feature accepts as (encodeable) input (Q. where would 'input' typically occur):
+    Input: The AtomArrayFeature feature accepts as (encodeable) input (Q. where would 'input'
+    typically occur):
     - A `biotite.structure.AtomArray` object.
     - TODO: a Biopython structure object
     - TODO: a file handler or file contents string?
@@ -418,7 +422,8 @@ class AtomArrayFeature(CustomFeature):
         )  # order may not be important due to Features.recursive_reorder
 
     def __post_init__(self):
-        # init the StructFeature - since it inherits from dict, pa type inference is automatic (via get_nested_type)
+        # init the StructFeature - since it inherits from dict, pa type inference is automatic (via
+        # get_nested_type)
         if self.all_atoms_present:
             assert self.residue_dictionary is not None, (
                 "residue_dictionary is required when all_atoms_present is True"
@@ -476,7 +481,8 @@ class AtomArrayFeature(CustomFeature):
             ]
         else:
             array_fields = {field.name for field in array.type}
-            # c.f. cast_array_to_feature: since we don't inherit from dict, we reproduce the logic here
+            # c.f. cast_array_to_feature: since we don't inherit from dict, we reproduce the logic
+            # here
             arrays = [
                 cast_array_to_feature(
                     array.field(name) if name in array_fields else null_array,
@@ -489,7 +495,8 @@ class AtomArrayFeature(CustomFeature):
     def _encode_example(
         self,
         value: Union[bs.AtomArray, Dict, Biomolecule, os.PathLike, bytes],
-        is_standardised: bool = False,  # if encoding a standardised Biomolecule, avoid re-standardising
+        # if encoding a standardised Biomolecule, avoid re-standardising
+        is_standardised: bool = False,
     ) -> dict:
         if isinstance(value, Biomolecule):
             return self._encode_example(value.atoms, is_standardised=value.is_standardised)
@@ -684,7 +691,8 @@ def file_type_from_path(path: str) -> str:
 
 @dataclass
 class StructureFeature(CustomFeature):
-    """Structure [`Feature`] to read (bio)molecular atomic structure data from supported file types.
+    """Structure [`Feature`] to read molecular atomic structure data from supported file types.
+
     The file contents are serialized as bytes, file path and file type within an Arrow table.
     The file contents are automatically decoded to a biotite AtomArray (if mode=="array") or a
     Biopython structure (if mode=="structure") when loading data from the dataset.
@@ -694,7 +702,8 @@ class StructureFeature(CustomFeature):
     - AtomArray documentation: https://www.biotite-python.org/latest/apidoc/biotite.structure.AtomArray.html#biotite.structure.AtomArray
     - Structure documentation: https://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ#the-structure-object
 
-    Input: The StructureFeature accepts as (encodeable) input (e.g. as structure values in the outputs of dataset_builder.generate_examples()):
+    Input: The StructureFeature accepts as (encodeable) input (e.g. as structure values in the
+    outputs of dataset_builder.generate_examples()):
     - A `str`: Absolute path to the structure file (i.e. random access is allowed).
     - A `dict` with the keys:
 
@@ -711,7 +720,8 @@ class StructureFeature(CustomFeature):
     Args:
         decode (`bool`, defaults to `True`):
             Whether to decode the structure data. If `False`,
-            returns the underlying dictionary in the format `{"path": structure_path, "bytes": structure_bytes, "type": structure_type}`.
+            returns the underlying dictionary in the format `{"path": structure_path, "bytes":
+            structure_bytes, "type": structure_type}`.
     """
 
     requires_encoding: bool = True
@@ -769,7 +779,8 @@ class StructureFeature(CustomFeature):
     def _encode_bytes(
         self, value: bytes, path: Optional[str] = None, file_type: Optional[str] = None
     ) -> dict:
-        # store the Structure bytes, and path is optionally used to infer the Structure format using the file extension
+        # store the Structure bytes, and path is optionally used to infer the Structure format
+        # using the file extension
         if file_type is None and path is not None:
             file_type = os.path.splitext(path)[1][1:].lower()
         if self.compression == "gzip":
@@ -795,14 +806,16 @@ class StructureFeature(CustomFeature):
             file_type = value.get("type") or file_type_from_path(path)
             if self.file_type is not None:
                 assert file_type == self.file_type
-            # we set "bytes": None to not duplicate the data if they're already available locally; embedding happens later
+            # we set "bytes": None to not duplicate the data if they're already available locally;
+            # embedding happens later
             # (this assumes invocation in what context?)
             return {"bytes": None, "path": path, "type": file_type}
         elif value.get("bytes") is not None:
             return self._encode_bytes(value, path=value.get("path"), file_type=value.get("type"))
         else:
             raise ValueError(
-                f"A structure sample should have one of 'path' or 'bytes' but they are missing or None in {value}."
+                "A structure sample should have one of 'path' or 'bytes' but they are missing "
+                f"or None in {value}."
             )
 
     def _encode_example(
@@ -986,7 +999,8 @@ class ProteinStructureFeature(StructureFeature):
         if self.residue_dictionary is None and self.load_as in ["chain", "complex"]:
             self.residue_dictionary = ProteinDictionary.from_preset("protein")
             logger.info(
-                "No residue_dictionary provided for ProteinStructureFeature, default ProteinDictionary will be used to decode."
+                "No residue_dictionary provided for ProteinStructureFeature, default "
+                "ProteinDictionary will be used to decode."
             )
         self.deserialize()
 

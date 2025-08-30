@@ -193,7 +193,8 @@ class ResidueDictionary:
         if self.conversions is not None:
             for conversion in self.conversions:
                 assert conversion["to_residue"] in self.residue_names
-                # tuples get converted to lists during serialization so we need to convert them back for eq checks
+                # tuples get converted to lists during serialization so we need to convert them
+                # back for eq checks
                 conversion["atom_swaps"] = [tuple(swaps) for swaps in conversion["atom_swaps"]]
                 conversion["element_swaps"] = [
                     tuple(swaps) for swaps in conversion["element_swaps"]
@@ -209,7 +210,8 @@ class ResidueDictionary:
         backbone_atoms: Optional[List[str]] = None,
         unknown_residue_name: str = "UNK",
         conversions: Optional[List[Dict]] = None,
-        minimum_pdb_entries: int = 1,  # ligands might often be unique - arguably res dict not that useful for these cases?
+        # ligands might often be unique - arguably res dict not that useful for these cases?
+        minimum_pdb_entries: int = 1,
         **kwargs,
     ):
         """Hydrogens and OXT are not included in the pre-built dictionary."""
@@ -289,11 +291,14 @@ class ResidueDictionary:
         residue_names: Optional[List[str]] = None,
         category: Optional[str] = None,
         keep_hydrogens: bool = False,
-        keep_oxt: bool = False,  # keeping it will add an extra atom to each residue during standardisation
+        # keeping it will add an extra atom to each residue during standardisation
+        keep_oxt: bool = False,
         backbone_atoms: Optional[List[str]] = None,
         unknown_residue_name: str = "UNK",
         conversions: Optional[List[Dict]] = None,
-        minimum_pdb_entries: int = 1,  # ligands might often be unique - but then what's benefit of residue dictionary for unique ligands? SmallMolecule doens't even use residue dictionary
+        # ligands might often be unique - but then what's benefit of residue dictionary for unique
+        # ligands? SmallMolecule doens't even use residue dictionary
+        minimum_pdb_entries: int = 1,
     ):
         ccd_data = get_ccd()
         chem_component_3to1 = get_component_3to1()
@@ -382,7 +387,10 @@ class ResidueDictionary:
         return atom_indices_mapping
 
     def relative_atom_indices_mapping(self, resnames: Optional[List[str]] = None) -> np.ndarray:
-        """Get a mapping from atom type index to expected index relative to the start of a given residue."""
+        """Get a map from atom type index to expected index.
+
+        Relative to the start of a given residue.
+        """
         assert self.atom_types is not None
         all_atom_indices_mapping = []
         expected_relative_atom_indices_mapping = {}
@@ -403,7 +411,7 @@ class ResidueDictionary:
 
     @property
     def total_element_types(self):
-        """How many element types across all proteins"""
+        """How many element types across all proteins."""
         assert self.element_types is not None
         return len(self.element_types)
 
@@ -508,7 +516,8 @@ class ResidueDictionary:
         return map_categories_to_indices(res_letter, self.residue_letters)
 
     def atomtype_index_full_to_short(self):
-        # return a num_residues, num_full, num_short mapping array (e.g. atom37 -> atom14 for each residue)
+        # return a num_residues, num_full, num_short mapping array
+        # (e.g. atom37 -> atom14 for each residue)
         raise NotImplementedError()
 
     def res_name_to_onehot(self, res_name: np.ndarray) -> np.ndarray:

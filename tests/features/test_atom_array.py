@@ -33,6 +33,7 @@ def test_encode_decode_atom_array_with_params(afdb_atom_array, feature_kwargs):
 
 def test_encode_decode_atom_array_without_residue_dictionary(afdb_atom_array):
     """Round-trip encoding of AtomArray.
+
     We encode residue-level annotations separately to the atom coords so
     important to check that they get decoded back to the atom array correctly.
     """

@@ -1,13 +1,16 @@
 """We upload asymmetric units.
 
-Ultimately what we want to be able to do is to infer the assembly from the coordinates for a single repeating unit.
+Ultimately what we want to be able to do is to infer the assembly from the coordinates for a single
+repeating unit.
 
-Before running this script, download the PDB data to the directory specified by `--pdb_download_dir`.
+Before running this script, download the PDB data to the directory specified by
+`--pdb_download_dir`.
 
 e.g. with:
 
-```
-aws s3 cp --recursive --no-sign-request s3://pdbsnapshots/20240101/pub/pdb/data/structures/divided/mmCIF/ <path>
+```bash
+aws s3 cp --recursive --no-sign-request \
+    s3://pdbsnapshots/20240101/pub/pdb/data/structures/divided/mmCIF/ <path>
 ```
 """
 
@@ -41,7 +44,8 @@ def examples_generator(pair_codes, pdb_download_dir, compress, remove_cif: bool 
 
     for pair_code in pair_codes:
         if not os.path.exists(os.path.join(pdb_download_dir, pair_code)):
-            # download from s3 -- intended that all the data is already downloaded, this is a backup
+            # download from s3 -- intended that all the data is already downloaded, this is a
+            # backup
             # TODO use boto3
             os.makedirs(os.path.join(pdb_download_dir, pair_code), exist_ok=True)
             subprocess.run(

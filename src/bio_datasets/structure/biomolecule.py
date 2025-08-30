@@ -15,7 +15,8 @@ from .residue import (
     get_residue_starts_mask,
 )
 
-# from biotite.structure.filter import filter_highest_occupancy_altloc  performed automatically by biotite
+# from biotite.structure.filter import filter_highest_occupancy_altloc  performed automatically by
+# biotite
 
 
 ALL_EXTRA_FIELDS = ["occupancy", "b_factor", "atom_id", "charge"]
@@ -194,7 +195,8 @@ class Biomolecule(Generic[T]):
             backbone_only=backbone_only,
         )
 
-        # first we get an array of atom indices for each residue (i.e. a mapping from atom type index to expected index
+        # first we get an array of atom indices for each residue (i.e. a mapping from atom type
+        # index to expected index
         # then we index into this array to get the expected relative index for each atom
         expected_relative_atom_indices = residue_dictionary.get_expected_relative_atom_indices(
             atoms.restype_index, atoms.atomtype_index
@@ -231,7 +233,8 @@ class Biomolecule(Generic[T]):
         residue_starts = get_residue_starts(atoms)
 
         assert len(full_residue_starts) == len(residue_starts), (
-            f"Full residue starts: {full_residue_starts} and residue starts: {residue_starts} do not match"
+            f"Full residue starts: {full_residue_starts} and residue starts: {residue_starts} "
+            "do not match"
         )
 
         existing_atom_indices_in_full_array = (
@@ -252,9 +255,11 @@ class Biomolecule(Generic[T]):
 
         # set_annotation vs setattr: set_annotation adds to annot and verifies size
         new_atom_array.coord[existing_atom_indices_in_full_array] = atoms.coord
-        # if we can create a res start index for each atom, we can assign the value based on that...
+        # if we can create a res start index for each atom, we can assign the value based on
+        # that...
         assert (np.unique(new_atom_array.res_index) == np.unique(atoms.res_index)).all(), (
-            f"New res index contains unexpected values (not matching old res index) {np.unique(new_atom_array.res_index)} {np.unique(atoms.res_index)}"
+            "New res index contains unexpected values (not matching old res index) "
+            f"{np.unique(new_atom_array.res_index)} {np.unique(atoms.res_index)}"
         )
         new_atom_array.set_annotation(
             "res_id",
@@ -513,7 +518,8 @@ class BaseBiomoleculeComplex(Biomolecule):
         residue_dictionary: Optional[ResidueDictionary] = None,
         **kwargs,
     ) -> "BaseBiomoleculeComplex":
-        # basically ensures that chains are in alphabetical order and all constituents are single-chain.
+        # basically ensures that chains are in alphabetical order and all constituents are
+        # single-chain.
         atoms = Biomolecule.filter_atoms(atoms, residue_dictionary, **kwargs)
         chain_ids = sorted(np.unique(atoms.chain_id))
         assert len(chain_ids) > 0, "No chains found"

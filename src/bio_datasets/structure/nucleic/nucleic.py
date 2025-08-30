@@ -41,7 +41,7 @@ residue_atoms, residue_elements = get_residue_atoms_and_elements(_canonical_nucl
 
 
 class NucleotideDictionary(ResidueDictionary):
-    """Defaults configure a dictionary with just the 20 standard amino acids"""
+    """Defaults configure a dictionary with just the 20 standard amino acids."""
 
     # TODO: these are actually all constants
     residue_names: np.ndarray = field(

@@ -61,7 +61,8 @@ def test_ccd_inferred_residue_atoms():
         assert np.all(
             np.array(expected_residue_atoms[resname]) == np.array(residue_atoms[resname])
         ), (
-            f"Disagreement for {resname}: Observed: {residue_atoms[resname]} != Expected: {expected_residue_atoms[resname]}"
+            f"Disagreement for {resname}: Observed: {residue_atoms[resname]} != Expected: "
+            f"{expected_residue_atoms[resname]}"
         )
 
 
@@ -98,7 +99,9 @@ def test_residue_atom_order(pdb_atoms_top7):
 
 
 def test_fill_missing_atoms(pdb_atoms_top7):
-    """REMARK 465 MISSING RESIDUES
+    """Test filling missing atoms in 1qys.
+
+    REMARK 465 MISSING RESIDUES
     REMARK 465 THE FOLLOWING RESIDUES WERE NOT LOCATED IN THE
     REMARK 465 EXPERIMENT. (M=MODEL NUMBER; RES=RESIDUE NAME; C=CHAIN
     REMARK 465 IDENTIFIER; SSSEQ=SEQUENCE NUMBER; I=INSERTION CODE.)
@@ -164,7 +167,9 @@ def test_fill_missing_atoms(pdb_atoms_top7):
 # n.b. filling missing residues is not yet implemented - would require
 # some decision on handling non-consecutive residue indices
 def test_fill_missing_residues(cif_file_1aq1):
-    """REMARK 465 MISSING RESIDUES
+    """TEST filling missing residues in 1aq1.
+
+    REMARK 465 MISSING RESIDUES
     REMARK 465 THE FOLLOWING RESIDUES WERE NOT LOCATED IN THE
     REMARK 465 EXPERIMENT. (M=MODEL NUMBER; RES=RESIDUE NAME; C=CHAIN
     REMARK 465 IDENTIFIER; SSSEQ=SEQUENCE NUMBER; I=INSERTION CODE.)

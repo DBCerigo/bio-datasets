@@ -6,8 +6,8 @@ and ligand are also represented by ProteinAtomArray features.
 We only upload the 'canonical' apo conformation for each protein.
 
 The sequences of the unbound states are not aligned to the bound state, so that each unbound state
-covers an identical set of residues to the bound state. Any missing coordinates in the unbound states
-are set to NaN.
+covers an identical set of residues to the bound state. Any missing coordinates in the unbound
+states are set to NaN.
 
 N.B. we recommend downloading the entire dataset first - using cloud downloads on an individual
 basis is slow and not robust.
@@ -130,8 +130,9 @@ def align_sequence_to_ref(
     ref_numbering: list[int] | None = None,
     subject_numbering: list[int] | None = None,
 ) -> tuple[str, str, list[int], list[int]]:
-    """Modified from pinder.core.structure.atoms.align_sequences, to retain all ref residues,
-    so that only subject residues are dropped.
+    """Modified from pinder.core.structure.atoms.align_sequences, to retain all ref residues.
+
+    So that only subject residues are dropped.
 
     Pinder might have chosen not to do this to avoid having to represent insertions.
 
@@ -203,10 +204,11 @@ def get_subject_positions_in_ref_masks(
     target_at,
     pdb_engine: str = "fastpdb",
 ):
-    """Whereas _get_seq_aligned_structures computes masks for the parts
-    of the two sequences that are mutually alignable, this returns the positions
-    of the subject sequence in the reference sequence, allowing us to map subject
-    coords onto the reference by doing ref_coords[subject_mask_in_ref], subj_coords[subj_mask].
+    """Whereas _get_seq_aligned_structures computes masks.
+
+    For the parts of the two sequences that are mutually alignable, this returns the positions of
+    the subject sequence in the reference sequence, allowing us to map subject coords onto the
+    reference by doing ref_coords[subject_mask_in_ref], subj_coords[subj_mask].
     """
     ref_info = _get_structure_and_res_info(ref_at, pdb_engine)
     subj_info = _get_structure_and_res_info(target_at, pdb_engine)
@@ -232,7 +234,7 @@ def get_subject_positions_in_ref_masks(
         == ref_residues[list(ref_ids).index(ref_id)]
     }
 
-    subj_resid_mutation_map = {
+    _ = {
         subj_id: ref_id
         for subj_id, ref_id in subj_resid_map.items()
         if subj_id not in subj_resid_seq_match_map
@@ -282,7 +284,8 @@ class PinderDataset:
 
         If using intersection, results should be the same as applying get_seq_aligned_structures.
         """
-        # N.B. pinder utils have stuff for handling multi-chain cases, so we need to assert that these are single-chain structures.
+        # N.B. pinder utils have stuff for handling multi-chain cases, so we need to assert that
+        # these are single-chain structures.
         ref_chains = bs.get_chains(ref_struct.atom_array)
         target_chains = bs.get_chains(target_struct.atom_array)
         assert len(set(target_chains)) == 1
@@ -303,7 +306,8 @@ class PinderDataset:
 
             # the below also automatically handles renumbering.
             aligned_target_at = ref_at.copy()
-            # We'll assume that the sequence is the same at positions that don't align, so only coords need to be masked
+            # We'll assume that the sequence is the same at positions that don't align, so only
+            # coords need to be masked
             aligned_target_at.coord[~subj_mask_in_ref] = np.nan
             if "b_factor" in ref_at._annot:
                 aligned_target_at.b_factor[~subj_mask_in_ref] = np.nan
@@ -344,7 +348,9 @@ class PinderDataset:
         return struct
 
     def make_structures(self, system: PinderSystem):
-        """We have to choose which reference to align to: choices are complex, apo (unbound) or predicted (unbound).
+        """We have to choose which reference to align to.
+
+        Choices are complex, apo (unbound) or predicted (unbound).
 
         Bound makes most sense I think.
         """
@@ -359,7 +365,8 @@ class PinderDataset:
         if len(native_R.atom_array) == 0 or len(native_L.atom_array) == 0:
             print(
                 f"Skipping {system.entry.id} because it has no atoms after excluding "
-                f"hetero atoms and non-standard aas, R {len(native_R.atom_array)} L {len(native_L.atom_array)}"
+                f"hetero atoms and non-standard aas, R {len(native_R.atom_array)} "
+                f"L {len(native_L.atom_array)}"
             )
             return None
 
@@ -374,7 +381,8 @@ class PinderDataset:
         holo_receptor = self._filter_non_standard(system.holo_receptor)
         holo_ligand = self._filter_non_standard(system.holo_ligand)
 
-        # apo_complex = system.create_apo_complex() - this superimposes structures, which gives info away about interaction
+        # apo_complex = system.create_apo_complex() - this superimposes structures, which gives
+        # info away about interaction
         # https://github.com/pinder-org/pinder/blob/8ad1ead7a174736635c13fa7266d9ca54cf9f44e/examples/pinder-system.ipynb
         if has_apo:
             apo_R, apo_L = system.apo_receptor, system.apo_ligand
@@ -391,7 +399,8 @@ class PinderDataset:
             pred_R, pred_L = None, None
 
         if has_apo:
-            # only change to native R is standardise atoms - already called above so should do nothing
+            # only change to native R is standardise atoms - already called above so should do
+            # nothing
             native_R_v1, apo_R = self.get_aligned_structures(
                 native_R,
                 apo_R,
@@ -478,7 +487,8 @@ class PinderDataset:
         metadata = self.metadata[self.metadata["id"] == id].iloc[0]
         # n.b. PinderSystem will automatically download if entry can't be found locally
         # TODO: if necessary, renumber reference ids to always be contiguous (before alignment)
-        # TODO: check whether paths exist and sleep if not (prevent parsing error due to truncated file download...)
+        # TODO: check whether paths exist and sleep if not (prevent parsing error due to truncated
+        # file download...)
         system = PinderSystem(entry=IndexEntry(**row.to_dict()), dataset_path=self.dataset_path)
         if system.entry.predicted_R:
             uniprot_seq_R = system.pred_receptor.sequence
@@ -659,7 +669,8 @@ if __name__ == "__main__":
             "ligand_uniprot_seq": Value("string"),
             # TODO: switch to array1d when following issue fixed:
             # https://github.com/huggingface/datasets/issues/7243
-            # the two sequences basically define the keys and values of a dictionary mapping resids to uniprot ids
+            # the two sequences basically define the keys and values of a dictionary mapping resids
+            # to uniprot ids
             "receptor_resids_with_uniprot_mapping": Sequence(Value("uint16")),
             "receptor_mapped_uniprot_resids": Sequence(Value("uint16")),
             "ligand_resids_with_uniprot_mapping": Sequence(Value("uint16")),

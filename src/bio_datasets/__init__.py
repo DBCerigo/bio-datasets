@@ -51,13 +51,17 @@ def override_features():
 
     def cast(self, target_schema, *args, **kwargs):
         """Cast table values to another schema.
+
         Only overridden because of Features import.
 
         Args:
+            self (`datasets.table.Table`): The table to cast.
             target_schema (`Schema`):
                 Schema to cast to, the names and order of fields must match.
             safe (`bool`, defaults to `True`):
                 Check for overflows or other unsafe conversions.
+            *args: Will be passed to `pyarrow.Table.cast()`.
+            **kwargs: Will be passed to `pyarrow.Table.cast()`.
 
         Returns:
             `datasets.table.Table`
@@ -150,10 +154,14 @@ def load_dataset(*args, use_feature_type: str = "bio", **kwargs):
     """Load a dataset with custom features. Wrapper around `datasets.load_dataset`.
 
     Args:
-        use_feature_type:
-            "bio" uses the (possibly bio-specific) features defined in the dataset info,
+        *args: Arguments passed to `datasets.load_dataset`.
+        use_feature_type: "bio" uses the (possibly bio-specific) features defined in the dataset
+            info,
             "fallback" uses only features compatible with the standard Datasets library,
             "none" removes the features types, providing only the raw data.
+            Default is "bio".
+        **kwargs: Keyword arguments passed to `datasets.load_dataset`.
+
     """
     assert use_feature_type in ["bio", "fallback", "none"]
     ds = datasets.load_dataset(*args, **kwargs)

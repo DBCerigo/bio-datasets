@@ -197,13 +197,15 @@ def get_pdbx_structure(
     include_bonds=False,
     fill_missing_residues: bool = False,
 ):
-    """Modified from biotite.structure.io.pdbx.get_structure to return canonical chain_id and res_id
-    and also add auth_chain_id and auth_res_id annotations.
+    """Modified from biotite.structure.io.pdbx.get_structure.
+
+    To return canonical chain_id and res_id and also add auth_chain_id and auth_res_id annotations.
 
     TODO: support use_author_fields. But n.b. fill_missing_polymer_chain_residues relies
     on atoms.res_id matching the canonical `label_seq_id` res_id.
     """
-    # there are also auth_comp_id, auth_atom_id for res_name, atom_name, but these seem a bit unnecessary.
+    # there are also auth_comp_id, auth_atom_id for res_name, atom_name, but these seem a bit
+    # unnecessary.
     extra_fields = extra_fields or []
     extra_fields += [
         f for f in ["auth_asym_id", "auth_seq_id", "label_entity_id"] if f not in extra_fields
@@ -321,12 +323,19 @@ def load_structure(
     fill_missing_residues=False,
     include_bonds=False,
 ):
-    """TODO: support foldcomp format, binary cif format
+    """Load a structure from pdb, cif or foldcomp format.
+
+    TODO: support foldcomp format, binary cif format
     TODO: support model choice / multiple models (multiple conformations)
 
     Args:
-        fpath: filepath to either pdb or cif file
-        chain: the chain id or list of chain ids to load
+        fpath_or_handler: filepath to either pdb or cif file
+        file_type: file type, either 'pdb', 'cif', 'bcif' or 'fcz' (foldcomp).
+        model: model number
+        extra_fields: list of extra fields to load
+        fill_missing_residues: whether to fill in missing residues with nan coordinates
+        include_bonds: whether to include bond information
+
     Returns:
         biotite.structure.AtomArray
     """
@@ -383,8 +392,9 @@ def load_structure(
 
 
 def _apply_transformations(structure, transformation_dict, operations):
-    """Get subassembly by applying the given operations to the input
-    structure containing affected asym IDs.
+    """Get subassembly by applying the given operations to the input structure.
+
+    When input structure contains affected asym IDs.
     """
     # Additional first dimesion for 'structure.repeat()'
     assembly_coord = np.zeros((len(operations),) + structure.coord.shape)

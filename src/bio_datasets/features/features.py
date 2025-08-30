@@ -30,7 +30,11 @@ from datasets.utils.py_utils import zip_dict
 
 
 class CustomFeature:
-    """Base class for feature types like Audio, Image, ClassLabel, etc that require special treatment (encoding/decoding)."""
+    """Base class for custom features.
+
+    Includes types like Audio, Image, ClassLabel, etc that require special treatment
+    (encoding/decoding).
+    """
 
     requires_encoding: ClassVar[bool] = False
     requires_decoding: ClassVar[bool] = False
@@ -62,8 +66,9 @@ class CustomFeature:
         )
 
 
-# because of recursion, we can't just call datasets encode_nested_example after checking for CustomFeature
-def encode_nested_example(schema, obj, level: int = 0):  # noqa: CCR001
+# because of recursion, we can't just call datasets encode_nested_example after checking for
+# CustomFeature
+def encode_nested_example(schema, obj, level: int = 0):
     # Nested structures: we allow dict, list/tuples, sequences
     if isinstance(schema, dict):
         if level == 0 and obj is None:
@@ -160,7 +165,8 @@ def encode_nested_example(schema, obj, level: int = 0):  # noqa: CCR001
         return schema.encode_example(obj) if obj is not None else None
     elif isinstance(schema, CustomFeature) and schema.requires_encoding:
         return schema.encode_example(obj) if obj is not None else None
-    # Other object should be directly convertible to a native Arrow type (like Translation and Translation)
+    # Other object should be directly convertible to a native Arrow type (like Translation and
+    # Translation)
     return obj
 
 
@@ -168,12 +174,14 @@ def decode_nested_example(  # noqa: CCR001
     schema, obj, token_per_repo_id: Optional[Dict[str, Union[str, bool, None]]] = None
 ):
     """Decode a nested example.
-    This is used since some features (in particular Audio and Image) have some logic during decoding.
 
-    To avoid iterating over possibly long lists, it first checks (recursively) if the first element that
-    is not None or empty (if it is a sequence) has to be decoded.
-    If the first element needs to be decoded, then all the elements of the list will be decoded,
-    otherwise they'll stay the same.
+    This is used since some features (in particular Audio and Image) have some logic during
+    decoding.
+
+    To avoid iterating over possibly long lists, it first checks (recursively) if the first element
+    that is not None or empty (if it is a sequence) has to be decoded. If the first element needs
+    to be decoded, then all the elements of the list will be decoded, otherwise they'll stay the
+    same.
     """
     # Nested structures: we allow dict, list/tuples, sequences
     if isinstance(schema, dict):
@@ -259,7 +267,7 @@ def is_bio_feature(class_name: str) -> bool:
 # assumption is that we basically just need;
 # yaml_data["features"] = Features._from_yaml_list(yaml_data["features"]) to work as expected
 class Features(Features, dict):
-    """We have things like
+    """We have things like.
 
     {'name': feature_name, 'feature_type_name': feature_type_dict}
     feature_type_name can be e.g. 'class_label' or 'sequence' or 'struct'
@@ -303,6 +311,7 @@ class Features(Features, dict):
     @classmethod
     def from_arrow_schema(cls, pa_schema: pa.Schema) -> "Features":
         """Construct [`Features`] from Arrow Schema.
+
         It also checks the schema metadata for Hugging Face Datasets features.
         Non-nullable fields are not supported and set to nullable.
 
@@ -403,8 +412,8 @@ class Features(Features, dict):
             example (`dict[str, Any]`):
                 Dataset row data.
             token_per_repo_id (`dict`, *optional*):
-                To access and decode audio or image files from private repositories on the Hub, you can pass
-                a dictionary `repo_id (str) -> token (bool or str)`.
+                To access and decode audio or image files from private repositories on the Hub, you
+                can pass a dictionary `repo_id (str) -> token (bool or str)`.
 
         Returns:
             `dict[str, Any]`
@@ -450,8 +459,8 @@ class Features(Features, dict):
             batch (`dict[str, list[Any]]`):
                 Dataset batch data.
             token_per_repo_id (`dict`, *optional*):
-                To access and decode audio or image files from private repositories on the Hub, you can pass
-                a dictionary repo_id (str) -> token (bool or str)
+                To access and decode audio or image files from private repositories on the Hub, you
+                can pass a dictionary repo_id (str) -> token (bool or str)
 
         Returns:
             `dict[str, list[Any]]`

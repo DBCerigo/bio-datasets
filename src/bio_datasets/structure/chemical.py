@@ -25,7 +25,8 @@ class SmallMolecule:
     The three letter 'res_name' is a unique identifier for a chemical component dictionary entry.
     The CCD maps to SMILES and InChI strings, as well as idealised 3D coordinates.
 
-    The true 3D coordinates are still the best representation - and already implicitly contain all bond information.
+    The true 3D coordinates are still the best representation - and already implicitly contain all
+    bond information.
 
     Refs:
     CCD: https://www.wwpdb.org/data/ccd
@@ -74,7 +75,8 @@ class SmallMolecule:
         )
         atoms.set_annotation(
             "hetero", np.ones(len(atoms), dtype=bool)
-        )  # N.B. this may sometimes be misleading - e.g. if we convert a protein to a small molecule
+        )
+        # N.B. this may sometimes be misleading - e.g. if we convert a protein to a small molecule
         atoms.bonds = bs.connect_via_residue_names(atoms, inter_residue=False)
         return atoms
 

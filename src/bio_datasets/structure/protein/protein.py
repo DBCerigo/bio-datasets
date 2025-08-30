@@ -1,8 +1,9 @@
-"""Defines protein objects that are lightweight wrappers around Biotite's AtomArray and AtomArrayStack.
+"""Defines protein objects that are wrappers around Biotite's AtomArray and AtomArrayStack.
 
 This library is not intended to be a general-purpose library for protein structure analysis.
 We simply wrap Biotite's AtomArray and AtomArrayStack to offer a few convenience methods
-for dealing with protein structures in an ML context; specifically exposing residue-level properties,
+for dealing with protein structures in an ML context; specifically exposing residue-level
+properties,
 including coordinates and distances.
 """
 
@@ -219,7 +220,8 @@ class ProteinMixin:
         assert self.residue_dictionary.atom37_compatible, (
             "Atom37 representation assumes use of standard amino acid dictionary"
         )
-        # since we have standardised the atoms we can just return standardised atom37 indices for each residue
+        # since we have standardised the atoms we can just return standardised atom37 indices
+        # for each residue
         atom37_coords = np.full((len(self.num_residues), len(atom_types), 3), np.nan)
         atom37_coords[self.atoms.residue_index, self.atoms.atom37_index] = self.atoms.coord
         return atom37_coords
