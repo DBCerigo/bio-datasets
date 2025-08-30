@@ -48,6 +48,7 @@ exclude = [
   "build", "dist", "data",
   "src/bio_datasets/structure/pdbx",
   "src/bio_datasets/structure/protein/library",
+  "*.ipynb",
 ]
 
 # Enable all linting + formatting in Ruff
@@ -60,16 +61,20 @@ select = [
   "N",   # pep8-naming
   "B",   # flake8-bugbear
   "C90", # mccabe complexity
-  "UP",  # pyupgrade
   "PD",  # pandas-vet
   "D",   # pydocstyle
   "PGH", # pygrep-hooks-like
   "PT",  # pytest-style
 ]
 ignore = [
+  "D100",  # missing docstring in public module
+  "D101",  # missing docstring in public class
+  "D102",  # missing docstring in public method
+  "D103",  # missing docstring in public function
   "D104",  # missing docstring in package __init__
   "D105",  # missing docstring in magic method
   "D107",  # missing docstring in __init__
+  "N806", # variable in function should be lowercase
 ]
 
 [tool.ruff.lint.pydocstyle]
