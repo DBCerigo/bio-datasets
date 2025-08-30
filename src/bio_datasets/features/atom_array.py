@@ -2,6 +2,7 @@
 
 Features are decoded into biotite atom arrays.
 """
+
 import functools
 import gzip
 import logging
@@ -41,8 +42,8 @@ from bio_datasets.structure.protein import (
     ProteinComplex,
     ProteinDictionary,
     ProteinMixin,
+    constants as protein_constants,
 )
-from bio_datasets.structure.protein import constants as protein_constants
 from bio_datasets.structure.residue import ResidueDictionary, get_residue_starts_mask
 
 if bio_config.FOLDCOMP_AVAILABLE:
@@ -113,9 +114,7 @@ def protein_atom_array_from_dict(
 def _pdb_encode_biotite_atom_array(
     array: bs.AtomArray, encode_with_foldcomp: bool = False, name: Optional[str] = None
 ) -> bytes:
-    """
-    Encode a biotite AtomArray to pdb string bytes, optionally compressing with foldcomp.
-    """
+    """Encode a biotite AtomArray to pdb string bytes, optionally compressing with foldcomp."""
     pdbf = PDBFile()
     pdbf.set_structure(array)
     contents = "\n".join(pdbf.lines) + "\n"
@@ -242,7 +241,6 @@ def _load_from_path(
     load_assembly: bool = False,
     include_bonds: bool = False,
 ) -> bs.AtomArray:
-
     if is_local_path(path):
         if load_assembly:
             return parsing.load_assembly(
@@ -314,8 +312,7 @@ def _file_handler_from_bytes(bytes_: bytes, file_type: Optional[str]):
 
 @dataclass
 class AtomArrayFeature(CustomFeature):
-    """
-    AtomArray [`Feature`] to read macromolecular atomic structure data from a PDB or CIF file.
+    """AtomArray [`Feature`] to read macromolecular atomic structure data from a PDB or CIF file.
 
     This feature stores the array directly as a pa struct (basically a dictionary of arrays),
     as defined in the AtomArrayExtensionType.
@@ -354,12 +351,12 @@ class AtomArrayFeature(CustomFeature):
     backbone_only: ClassVar[bool] = False
     requires_encoding: bool = True
     requires_decoding: bool = True
-    all_atoms_present: bool = (
-        False  # when all atoms are present, we dont need to store atom name
-    )
+    all_atoms_present: bool = False  # when all atoms are present, we dont need to store atom name
     decode: bool = True
     encode_assembly: bool = False
-    load_as: str = "biotite"  # biomolecule or chain or complex or biotite; if chain must be monomer
+    load_as: str = (
+        "biotite"  # biomolecule or chain or complex or biotite; if chain must be monomer
+    )
     constructor_kwargs: Optional[Dict] = None
     coords_dtype: str = "float32"
     b_factor_is_plddt: bool = False
@@ -423,9 +420,9 @@ class AtomArrayFeature(CustomFeature):
     def __post_init__(self):
         # init the StructFeature - since it inherits from dict, pa type inference is automatic (via get_nested_type)
         if self.all_atoms_present:
-            assert (
-                self.residue_dictionary is not None
-            ), "residue_dictionary is required when all_atoms_present is True"
+            assert self.residue_dictionary is not None, (
+                "residue_dictionary is required when all_atoms_present is True"
+            )
         self.deserialize()
         self._features = self._make_features_dict()
         if not self.with_element and not self.all_atoms_present:
@@ -487,9 +484,7 @@ class AtomArrayFeature(CustomFeature):
                 )
                 for name, subfeature in self._features.items()
             ]
-        return pa.StructArray.from_arrays(
-            arrays, names=list(self._features), mask=null_mask
-        )
+        return pa.StructArray.from_arrays(arrays, names=list(self._features), mask=null_mask)
 
     def _encode_example(
         self,
@@ -497,9 +492,7 @@ class AtomArrayFeature(CustomFeature):
         is_standardised: bool = False,  # if encoding a standardised Biomolecule, avoid re-standardising
     ) -> dict:
         if isinstance(value, Biomolecule):
-            return self._encode_example(
-                value.atoms, is_standardised=value.is_standardised
-            )
+            return self._encode_example(value.atoms, is_standardised=value.is_standardised)
         if isinstance(value, dict):
             return self._encode_dict(value)
         elif isinstance(value, bs.AtomArray):
@@ -513,9 +506,7 @@ class AtomArrayFeature(CustomFeature):
 
     def _encode_dict(self, value: Dict) -> dict:
         if "bytes" in value or "path" in value or "type" in value:
-            struct = load_structure_from_file_dict(
-                value, extra_fields=self.extra_fields
-            )
+            struct = load_structure_from_file_dict(value, extra_fields=self.extra_fields)
             return self._encode_example(struct)
         if all(attr in value for attr in self.required_keys):
             return value
@@ -530,22 +521,16 @@ class AtomArrayFeature(CustomFeature):
             )
         if self.load_as == "chain":
             chain_ids = np.unique(value.chain_id)
-            assert (
-                len(chain_ids) == 1
-            ), "Only single chain supported when `load_as` == 'chain'"
+            assert len(chain_ids) == 1, "Only single chain supported when `load_as` == 'chain'"
         residue_starts = get_residue_starts(value)
         if residue_starts.max() > 2**32 - 1 and not self.all_atoms_present:
             raise ValueError("AtomArray too large to fit in uint32 (residue starts)")
         return self._build_atom_array_struct(value, residue_starts)
 
-    def _build_atom_array_struct(
-        self, value: bs.AtomArray, residue_starts: np.ndarray
-    ) -> dict:
+    def _build_atom_array_struct(self, value: bs.AtomArray, residue_starts: np.ndarray) -> dict:
         atom_array_struct = {"coords": value.coord}
         if self.residue_dictionary is not None:
-            atom_array_struct[
-                "restype_index"
-            ] = self.residue_dictionary.res_name_to_index(
+            atom_array_struct["restype_index"] = self.residue_dictionary.res_name_to_index(
                 value.res_name[residue_starts]
             )
         else:
@@ -587,9 +572,7 @@ class AtomArrayFeature(CustomFeature):
         if os.path.exists(value):
             file_type = xsplitext(value)[1][1:].lower()
             return self._encode_example(
-                parsing.load_structure(
-                    value, format=file_type, extra_fields=self.extra_fields
-                )
+                parsing.load_structure(value, format=file_type, extra_fields=self.extra_fields)
             )
         raise ValueError(f"Path does not exist: {value}")
 
@@ -653,9 +636,7 @@ class AtomArrayFeature(CustomFeature):
             atoms.set_annotation("res_id", residue_index + 1)
 
         if self.residue_dictionary is not None:
-            atoms.set_annotation(
-                "restype_index", value.pop("restype_index")[residue_index]
-            )
+            atoms.set_annotation("restype_index", value.pop("restype_index")[residue_index])
             atoms.set_annotation(
                 "res_name",
                 np.array(self.residue_dictionary.residue_names)[atoms.restype_index],
@@ -674,9 +655,7 @@ class AtomArrayFeature(CustomFeature):
         else:
             raise ValueError("with_element must be True if all_atoms_present is False")
 
-    def _decode_example(
-        self, value: dict, token_per_repo_id=None
-    ) -> Union["bs.AtomArray", None]:
+    def _decode_example(self, value: dict, token_per_repo_id=None) -> Union["bs.AtomArray", None]:
         atoms = self._decode_atoms(value, token_per_repo_id=token_per_repo_id)
 
         constructor_kwargs = self.constructor_kwargs or {}
@@ -738,11 +717,11 @@ class StructureFeature(CustomFeature):
     requires_encoding: bool = True
     requires_decoding: bool = True
     decode: bool = True
-    load_as: str = "biotite"  # biomolecule or chain or complex or biotite; if chain must be monomer
-    constructor_kwargs: dict = None
-    load_assembly: bool = (
-        False  # load full biological assembly. requires cif / bcif file type.
+    load_as: str = (
+        "biotite"  # biomolecule or chain or complex or biotite; if chain must be monomer
     )
+    constructor_kwargs: dict = None
+    load_assembly: bool = False  # load full biological assembly. requires cif / bcif file type.
     file_type: Optional[str] = None  # will be inferred from example if not provided
     fill_missing_residues: bool = False  # fill in missing residues from entity_poly_seq
     include_bonds: bool = False  # include bonds in the AtomArray
@@ -759,9 +738,9 @@ class StructureFeature(CustomFeature):
 
     def __post_init__(self):
         if self.load_as in ["chain", "complex"]:
-            assert "residue_dictionary" in (
-                self.constructor_kwargs or {}
-            ), "residue_dictionary must be provided if load_as is chain or complex"
+            assert "residue_dictionary" in (self.constructor_kwargs or {}), (
+                "residue_dictionary must be provided if load_as is chain or complex"
+            )
 
     def __call__(self):
         return self.pa_type
@@ -794,15 +773,11 @@ class StructureFeature(CustomFeature):
         if file_type is None and path is not None:
             file_type = os.path.splitext(path)[1][1:].lower()
         if self.compression == "gzip":
-            assert not file_type.endswith(
-                ".gz"
-            ), "Gzipped files should not be compressed again"
+            assert not file_type.endswith(".gz"), "Gzipped files should not be compressed again"
             value["bytes"] = gzip.compress(value["bytes"])
             value["type"] = value["type"] + ".gz"
         elif self.compression == "foldcomp":
-            assert (
-                file_type == "pdb"
-            ), "foldcomp compression only supported for PDB files"
+            assert file_type == "pdb", "foldcomp compression only supported for PDB files"
             value["bytes"] = foldcomp.compress(value["bytes"])
             value["type"] = "fcz"
         elif self.compression is not None:
@@ -824,9 +799,7 @@ class StructureFeature(CustomFeature):
             # (this assumes invocation in what context?)
             return {"bytes": None, "path": path, "type": file_type}
         elif value.get("bytes") is not None:
-            return self._encode_bytes(
-                value, path=value.get("path"), file_type=value.get("type")
-            )
+            return self._encode_bytes(value, path=value.get("path"), file_type=value.get("type"))
         else:
             raise ValueError(
                 f"A structure sample should have one of 'path' or 'bytes' but they are missing or None in {value}."
@@ -850,9 +823,7 @@ class StructureFeature(CustomFeature):
         elif isinstance(value, bs.AtomArray):
             if self.load_as == "chain":
                 chain_ids = np.unique(value.chain_id)
-                assert (
-                    len(chain_ids) == 1
-                ), "Only single chain supported when `load_as` == 'chain'"
+                assert len(chain_ids) == 1, "Only single chain supported when `load_as` == 'chain'"
             encoded = {
                 "path": None,
                 "bytes": encode_biotite_atom_array(
@@ -868,9 +839,9 @@ class StructureFeature(CustomFeature):
             raise ValueError(f"Unsupported value type: {type(value)}")
 
         if self.load_assembly or self.fill_missing_residues:
-            assert encoded["type"][
-                "cif", "bcif", "cif.gz", "bcif.gz"
-            ], "load_assembly and fill_missing_residues require cif/bcif file type"
+            assert encoded["type"]["cif", "bcif", "cif.gz", "bcif.gz"], (
+                "load_assembly and fill_missing_residues require cif/bcif file type"
+            )
         return encoded
 
     def _decode_atoms(self, value: dict, token_per_repo_id=None):
@@ -889,9 +860,7 @@ class StructureFeature(CustomFeature):
         )
         return atoms
 
-    def _decode_example(
-        self, value: dict, token_per_repo_id=None
-    ) -> Union["bs.AtomArray", None]:
+    def _decode_example(self, value: dict, token_per_repo_id=None) -> Union["bs.AtomArray", None]:
         """Decode example structure file into AtomArray data.
 
         Args:
@@ -961,9 +930,7 @@ class StructureFeature(CustomFeature):
             if self.compression == "gzip" and not path.endswith(".gz"):
                 bytes_ = gzip.compress(bytes_)
             elif self.compression == "foldcomp" and not path.endswith(".fcz"):
-                assert path.endswith(
-                    ".pdb"
-                ), "foldcomp compression only supported for PDB files"
+                assert path.endswith(".pdb"), "foldcomp compression only supported for PDB files"
                 bytes_ = foldcomp.compress(bytes_)
             elif self.compression is not None:
                 raise ValueError(f"Unsupported compression: {self.compression}")
@@ -1008,7 +975,9 @@ class ProteinStructureFeature(StructureFeature):
     N.B. ignores load_as
     """
 
-    load_as: str = "complex"  # biomolecule or chain or complex or biotite; if chain must be monomer
+    load_as: str = (
+        "complex"  # biomolecule or chain or complex or biotite; if chain must be monomer
+    )
     _type: str = field(default="ProteinStructureFeature", init=False, repr=False)
     residue_dictionary: Optional[Union[ResidueDictionary, Dict]] = None
 
@@ -1040,9 +1009,7 @@ class ProteinStructureFeature(StructureFeature):
         if self.load_as == "biotite":
             return atoms
         elif self.load_as == "biomolecule":
-            raise ValueError(
-                "Returning biomolecule for protein-specific feature not supported."
-            )
+            raise ValueError("Returning biomolecule for protein-specific feature not supported.")
         elif self.load_as == "chain":
             return ProteinChain(
                 atoms, residue_dictionary=self.residue_dictionary, **constructor_kwargs
@@ -1057,7 +1024,6 @@ class ProteinStructureFeature(StructureFeature):
 
 @dataclass
 class ProteinAtomArrayFeature(AtomArrayFeature):
-
     """Decodes to a `bio_datasets.protein.Protein` or `bio_datasets.protein.ProteinComplex` object.
 
     Advantages of protein-specific features:
@@ -1079,7 +1045,9 @@ class ProteinAtomArrayFeature(AtomArrayFeature):
     residue_dictionary: ProteinDictionary = field(
         default_factory=functools.partial(ProteinDictionary.from_preset, "protein")
     )
-    load_as: str = "complex"  # biomolecule or chain or complex or biotite; if chain must be monomer
+    load_as: str = (
+        "complex"  # biomolecule or chain or complex or biotite; if chain must be monomer
+    )
     internal_coords_type: str = None  # foldcomp, idealised, or pnerf
     _type: str = field(
         default="ProteinAtomArrayFeature", init=False, repr=False
@@ -1087,9 +1055,7 @@ class ProteinAtomArrayFeature(AtomArrayFeature):
 
     def __post_init__(self):
         super().__post_init__()
-        assert (
-            self.residue_dictionary is not None
-        ), "residue_dictionary must be provided"
+        assert self.residue_dictionary is not None, "residue_dictionary must be provided"
 
     def deserialize(self):
         if isinstance(self.residue_dictionary, dict):
@@ -1141,18 +1107,14 @@ class ProteinAtomArrayFeature(AtomArrayFeature):
             # TODO: switch to extracting backbone.
             if self.backbone_only:
                 value = value.backbone()
-            return super()._encode_example(
-                value.atoms, is_standardised=value.is_standardised
-            )
+            return super()._encode_example(value.atoms, is_standardised=value.is_standardised)
         if isinstance(value, bs.AtomArray):
             value = value[~np.isin(value.element, ["H", "D"])]
             value = value[filter_amino_acids(value)]
             if not self.residue_dictionary.keep_oxt:
                 value = value[value.atom_name != "OXT"]
             if self.backbone_only:
-                backbone_mask = np.isin(
-                    value.atom_name, self.residue_dictionary.backbone_atoms
-                )
+                backbone_mask = np.isin(value.atom_name, self.residue_dictionary.backbone_atoms)
                 value = value[backbone_mask]
             return super()._encode_example(value)
         return super()._encode_example(value)
@@ -1167,9 +1129,7 @@ class ProteinAtomArrayFeature(AtomArrayFeature):
         if self.load_as == "biotite":
             return atoms
         elif self.load_as == "biomolecule":
-            raise ValueError(
-                "Returning biomolecule for protein-specific feature not supported."
-            )
+            raise ValueError("Returning biomolecule for protein-specific feature not supported.")
         elif self.load_as == "chain":
             return ProteinChain(
                 atoms, residue_dictionary=self.residue_dictionary, **constructor_kwargs

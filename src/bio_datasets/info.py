@@ -48,11 +48,7 @@ class DatasetInfo(DatasetInfo):
 
     def _dump_info(self, file, pretty_print=False):
         """Dump info in `file` file-like object open in bytes mode (to support remote files)"""
-        file.write(
-            json.dumps(self.to_dict(), indent=4 if pretty_print else None).encode(
-                "utf-8"
-            )
-        )
+        file.write(json.dumps(self.to_dict(), indent=4 if pretty_print else None).encode("utf-8"))
 
     @classmethod
     def _from_yaml_dict(cls, yaml_data: dict) -> "DatasetInfo":

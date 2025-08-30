@@ -1,4 +1,5 @@
 """Modified from biotite setup_ccd.py"""
+
 # flake8: noqa
 import gzip
 import json
@@ -14,12 +15,7 @@ import requests
 from bio_datasets.structure.pdbx import *
 
 OUTPUT_CCD = (
-    Path(__file__).parent
-    / "src"
-    / "bio_datasets"
-    / "structure"
-    / "library"
-    / "components.bcif"
+    Path(__file__).parent / "src" / "bio_datasets" / "structure" / "library" / "components.bcif"
 )
 CCD_URL = "https://files.wwpdb.org/pub/pdb/data/monomers/components.cif.gz"
 

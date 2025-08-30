@@ -13,7 +13,6 @@ os.environ["HF_DATASETS_CACHE"] = os.path.join(HF_CACHE_HOME, "bio_datasets")
 import importlib
 import json
 import logging
-from pathlib import Path
 from typing import Dict, Optional
 
 import biotite
@@ -29,13 +28,9 @@ if version.parse(biotite.__version__) > version.parse("1.0.2"):
     if ccd_path.exists():
         set_ccd_path(ccd_path)
     else:
-        logger.warning(
-            f"CCD file not found at {ccd_path}, SMILES support may not be available"
-        )
+        logger.warning(f"CCD file not found at {ccd_path}, SMILES support may not be available")
 else:
-    logger.warning(
-        "Biotite version is less than 1.0.2, SMILES support may not be available"
-    )
+    logger.warning("Biotite version is less than 1.0.2, SMILES support may not be available")
 
 # imports required for overrides
 from .features import Features
@@ -43,7 +38,6 @@ from .info import DatasetInfo
 
 
 def override_features():
-
     SPARK_AVAILABLE = importlib.util.find_spec("pyspark") is not None
     import datasets
     import datasets.io
@@ -56,8 +50,7 @@ def override_features():
     import datasets.io.text
 
     def cast(self, target_schema, *args, **kwargs):
-        """
-        Cast table values to another schema.
+        """Cast table values to another schema.
         Only overridden because of Features import.
 
         Args:
@@ -69,7 +62,6 @@ def override_features():
         Returns:
             `datasets.table.Table`
         """
-
         table = datasets.table.table_cast(self.table, target_schema, *args, **kwargs)
         target_features = Features.from_arrow_schema(target_schema)
         blocks = []
@@ -80,19 +72,10 @@ def override_features():
                 subfields = []
                 for name in subtable.column_names:
                     subfields.append(
-                        fields.pop(
-                            next(
-                                i
-                                for i, field in enumerate(fields)
-                                if field.name == name
-                            )
-                        )
+                        fields.pop(next(i for i, field in enumerate(fields) if field.name == name))
                     )
                 subfeatures = Features(
-                    {
-                        subfield.name: target_features[subfield.name]
-                        for subfield in subfields
-                    }
+                    {subfield.name: target_features[subfield.name] for subfield in subfields}
                 )
                 subschema = subfeatures.arrow_schema
                 new_tables.append(subtable.cast(subschema, *args, **kwargs))
@@ -100,12 +83,8 @@ def override_features():
         return datasets.table.ConcatenationTable(table, blocks)
 
     @staticmethod
-    def _build_metadata(
-        info: DatasetInfo, fingerprint: Optional[str] = None
-    ) -> Dict[str, str]:
-        info_keys = [
-            "features"
-        ]  # we can add support for more DatasetInfo keys in the future
+    def _build_metadata(info: DatasetInfo, fingerprint: Optional[str] = None) -> Dict[str, str]:
+        info_keys = ["features"]  # we can add support for more DatasetInfo keys in the future
         info_as_dict = info.to_dict()
         metadata = {}
         metadata["info"] = {key: info_as_dict[key] for key in info_keys}
@@ -168,8 +147,7 @@ from .structure import *
 
 
 def load_dataset(*args, use_feature_type: str = "bio", **kwargs):
-    """
-    Load a dataset with custom features. Wrapper around `datasets.load_dataset`.
+    """Load a dataset with custom features. Wrapper around `datasets.load_dataset`.
 
     Args:
         use_feature_type:

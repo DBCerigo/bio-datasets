@@ -20,9 +20,7 @@ def test_encode_decode_atom_array_with_params(afdb_atom_array, feature_kwargs):
     encoded = feat.encode_example(afdb_atom_array)
     bs_sequences, _ = to_sequence(afdb_atom_array)
     if "restype_index" in encoded:
-        assert prot_dict.decode_restype_index(encoded["restype_index"]) == str(
-            bs_sequences[0]
-        )
+        assert prot_dict.decode_restype_index(encoded["restype_index"]) == str(bs_sequences[0])
     decoded = feat.decode_example(encoded)
     if not feature_kwargs["all_atoms_present"]:
         # if all_atoms_present is True, atom order will be different

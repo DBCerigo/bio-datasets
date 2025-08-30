@@ -10,6 +10,7 @@ e.g. with:
 aws s3 cp --recursive --no-sign-request s3://pdbsnapshots/20240101/pub/pdb/data/structures/divided/mmCIF/ <path>
 ```
 """
+
 import argparse
 import glob
 import os
@@ -24,9 +25,7 @@ def get_pdb_id(assembly_file):
     return os.path.basename(assembly_file).split("-")[0]
 
 
-def examples_generator(
-    pair_codes, pdb_download_dir, compress, remove_cif: bool = False
-):
+def examples_generator(pair_codes, pdb_download_dir, compress, remove_cif: bool = False):
     if pair_codes is None:
         result = subprocess.check_output(
             [
@@ -38,9 +37,7 @@ def examples_generator(
             ],
             text=True,
         )
-        pair_codes = [
-            line.split()[1][:-1] for line in result.splitlines() if "PRE" in line
-        ]
+        pair_codes = [line.split()[1][:-1] for line in result.splitlines() if "PRE" in line]
 
     for pair_code in pair_codes:
         if not os.path.exists(os.path.join(pdb_download_dir, pair_code)):
@@ -62,9 +59,7 @@ def examples_generator(
 
         cif_files = glob.glob(os.path.join(pdb_download_dir, pair_code, "*.cif.gz"))
         if cif_files and not glob.glob(
-            os.path.join(
-                pdb_download_dir, pair_code, "*.bcif.gz" if compress else "*.bcif"
-            )
+            os.path.join(pdb_download_dir, pair_code, "*.bcif.gz" if compress else "*.bcif")
         ):
             print(f"Converting CIFs to bCIFs for {pair_code}")
             converter_args = [
@@ -81,9 +76,7 @@ def examples_generator(
             )
 
         downloaded_bcifs = glob.glob(
-            os.path.join(
-                pdb_download_dir, pair_code, "*.bcif.gz" if compress else "*.bcif"
-            )
+            os.path.join(pdb_download_dir, pair_code, "*.bcif.gz" if compress else "*.bcif")
         )
         if not downloaded_bcifs:
             raise ValueError(f"No assemblies found for {pair_code}")
@@ -100,11 +93,7 @@ def examples_generator(
                 },
             }
             if remove_cif:
-                os.remove(
-                    assembly_file.replace(
-                        ".bcif.gz" if compress else ".bcif", ".cif.gz"
-                    )
-                )
+                os.remove(assembly_file.replace(".bcif.gz" if compress else ".bcif", ".cif.gz"))
 
 
 def main(args):
@@ -137,15 +126,9 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config_name", type=str, default=None)
-    parser.add_argument(
-        "--pair_codes", nargs="+", help="PDB 2-letter codes", default=None
-    )
-    parser.add_argument(
-        "--backbone_only", action="store_true", help="Whether to drop sidechains"
-    )
-    parser.add_argument(
-        "--as_array", action="store_true", help="Whether to return an array"
-    )
+    parser.add_argument("--pair_codes", nargs="+", help="PDB 2-letter codes", default=None)
+    parser.add_argument("--backbone_only", action="store_true", help="Whether to drop sidechains")
+    parser.add_argument("--as_array", action="store_true", help="Whether to return an array")
     parser.add_argument(
         "--pdb_download_dir",
         type=str,

@@ -12,6 +12,7 @@ are set to NaN.
 N.B. we recommend downloading the entire dataset first - using cloud downloads on an individual
 basis is slow and not robust.
 """
+
 import argparse
 import contextlib
 import io
@@ -38,8 +39,7 @@ from bio_datasets import (
     Value,
 )
 from bio_datasets.structure.biomolecule import Biomolecule
-from bio_datasets.structure.protein import ProteinDictionary
-from bio_datasets.structure.protein import constants as protein_constants
+from bio_datasets.structure.protein import ProteinDictionary, constants as protein_constants
 
 UPLOAD = "upload_from_filename"
 DOWNLOAD = "download_to_filename"
@@ -88,9 +88,7 @@ def import_pinder(override_gsutil: bool = False):
 
     class Gsutil(pinder.core.utils.cloud.Gsutil):
         @staticmethod
-        def process_many(
-            *args: List[Tuple[str, Blob]], **kwargs: int | tuple[int, int]
-        ) -> None:
+        def process_many(*args: List[Tuple[str, Blob]], **kwargs: int | tuple[int, int]) -> None:
             process_many(*args, **kwargs)
             return None
 
@@ -158,7 +156,7 @@ def align_sequence_to_ref(
             - Numbering of the aligned reference sequence (list[int])
             - Numbering of the aligned subject sequence (list[int])
 
-    Raises
+    Raises:
     ------
         ValueError if the sequences cannot be aligned.
     """
@@ -181,7 +179,7 @@ def align_sequence_to_ref(
     ref_sequence_mapped = ""
     ui = -1
     pj = -1
-    for p, u in zip(s[0], s[1]):
+    for p, u in zip(s[0], s[1], strict=False):
         if u:
             ui += 1
         if p:
@@ -247,18 +245,13 @@ def get_subject_positions_in_ref_masks(
     #     assert len(atoms) == len(ref_atoms), f"{atoms} != {ref_atoms} {ref_atoms.ins_code}"
 
     # values are positions in ref that subject aligns to and has matching sequence
-    subj_mask_in_ref = mask_from_res_list(
-        ref_structure, list(subj_resid_seq_match_map.values())
-    )
-    subj_mask = mask_from_res_list(
-        subj_structure, list(subj_resid_seq_match_map.keys())
-    )
+    subj_mask_in_ref = mask_from_res_list(ref_structure, list(subj_resid_seq_match_map.values()))
+    subj_mask = mask_from_res_list(subj_structure, list(subj_resid_seq_match_map.keys()))
     # TODO: we could include backbone at aligned but non-identical positions
     return subj_mask_in_ref, subj_mask
 
 
 class PinderDataset:
-
     """Class to handle aligning of apo sequences to complex and standardisation of structures.
 
     We use sequence alignment because then the atom types will be the same.
@@ -274,9 +267,7 @@ class PinderDataset:
         self.index = index
         self.metadata = metadata
         self.cleanup = cleanup
-        self.dataset_path = (
-            pathlib.Path(dataset_path) if dataset_path is not None else None
-        )
+        self.dataset_path = pathlib.Path(dataset_path) if dataset_path is not None else None
 
     def __len__(self):
         return len(self.index)
@@ -307,9 +298,7 @@ class PinderDataset:
 
         if mode == "ref":
             # We drop any target residues that aren't present in the reference.
-            subj_mask_in_ref, subj_mask = get_subject_positions_in_ref_masks(
-                ref_at, target_at
-            )
+            subj_mask_in_ref, subj_mask = get_subject_positions_in_ref_masks(ref_at, target_at)
             # TODO: add assert that mapped positions agree
 
             # the below also automatically handles renumbering.
@@ -413,12 +402,12 @@ class PinderDataset:
                 apo_L,
                 mode="ref",
             )
-            assert len(native_R_v1.atom_array) == len(
-                native_R.atom_array
-            ), f"{len(native_R_v1.atom_array)} != {len(native_R.atom_array)}"
-            assert len(native_L_v1.atom_array) == len(
-                native_L.atom_array
-            ), f"{len(native_L_v1.atom_array)} != {len(native_L.atom_array)}"
+            assert len(native_R_v1.atom_array) == len(native_R.atom_array), (
+                f"{len(native_R_v1.atom_array)} != {len(native_R.atom_array)}"
+            )
+            assert len(native_L_v1.atom_array) == len(native_L.atom_array), (
+                f"{len(native_L_v1.atom_array)} != {len(native_L.atom_array)}"
+            )
 
         if has_pred:
             _, pred_R = self.get_aligned_structures(
@@ -468,12 +457,12 @@ class PinderDataset:
                     os.remove(pred_L.filepath)
         native = native_R + native_L
         # TODO: add uniprot seq and mapping to native
-        assert len(holo_receptor_at) == len(
-            native_R.atom_array
-        ), f"{len(holo_receptor_at)} != {len(native_R.atom_array)}"
-        assert len(holo_ligand_at) == len(
-            native_L.atom_array
-        ), f"{len(holo_ligand_at)} != {len(native_L.atom_array)}"
+        assert len(holo_receptor_at) == len(native_R.atom_array), (
+            f"{len(holo_receptor_at)} != {len(native_R.atom_array)}"
+        )
+        assert len(holo_ligand_at) == len(native_L.atom_array), (
+            f"{len(holo_ligand_at)} != {len(native_L.atom_array)}"
+        )
         return {
             "complex": native,
             "apo_receptor": apo_R,
@@ -490,9 +479,7 @@ class PinderDataset:
         # n.b. PinderSystem will automatically download if entry can't be found locally
         # TODO: if necessary, renumber reference ids to always be contiguous (before alignment)
         # TODO: check whether paths exist and sleep if not (prevent parsing error due to truncated file download...)
-        system = PinderSystem(
-            entry=IndexEntry(**row.to_dict()), dataset_path=self.dataset_path
-        )
+        system = PinderSystem(entry=IndexEntry(**row.to_dict()), dataset_path=self.dataset_path)
         if system.entry.predicted_R:
             uniprot_seq_R = system.pred_receptor.sequence
         else:
@@ -556,9 +543,7 @@ class PinderDataset:
 @contextlib.contextmanager
 def suppress_output():
     # Suppress stdout and stderr
-    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(
-        io.StringIO()
-    ):
+    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
         # Disable logging temporarily
         logging.disable(logging.CRITICAL)
         try:
@@ -576,9 +561,7 @@ def examples_generator(
     cleanup: bool = False,
 ):
     for index_df in index:
-        ds = PinderDataset(
-            index_df, metadata, dataset_path=dataset_path, cleanup=cleanup
-        )
+        ds = PinderDataset(index_df, metadata, dataset_path=dataset_path, cleanup=cleanup)
         print(f"Dataset length: {len(ds)}")
         for i in tqdm.tqdm(range(len(ds)), disable=len(index) > 1):
             if max_examples is not None and i >= max_examples:
@@ -595,17 +578,13 @@ def examples_generator(
                 continue
             ex["complex"] = ex["complex"].atom_array
             ex["apo_receptor"] = (
-                ex["apo_receptor"].atom_array
-                if ex["apo_receptor"] is not None
-                else None
+                ex["apo_receptor"].atom_array if ex["apo_receptor"] is not None else None
             )
             ex["apo_ligand"] = (
                 ex["apo_ligand"].atom_array if ex["apo_ligand"] is not None else None
             )
             ex["pred_receptor"] = (
-                ex["pred_receptor"].atom_array
-                if ex["pred_receptor"] is not None
-                else None
+                ex["pred_receptor"].atom_array if ex["pred_receptor"] is not None else None
             )
             ex["pred_ligand"] = (
                 ex["pred_ligand"].atom_array if ex["pred_ligand"] is not None else None
@@ -626,8 +605,7 @@ if __name__ == "__main__":
     parser.add_argument("--cleanup", action="store_true")
     args = parser.parse_args()
     import_pinder(
-        override_gsutil=args.safe_download
-        or (args.num_proc is not None and args.num_proc > 1)
+        override_gsutil=args.safe_download or (args.num_proc is not None and args.num_proc > 1)
     )
 
     index = get_index()
@@ -639,15 +617,11 @@ if __name__ == "__main__":
         if args.subset is not None:
             if args.subset == "cluster_representatives":
                 assert args.split == "train"
-                index = (
-                    index[index["split"] == args.split].groupby("cluster_id").head(1)
-                )
+                index = index[index["split"] == args.split].groupby("cluster_id").head(1)
                 split = "cluster_representatives_train"
             else:
                 assert args.split == "test"
-                index = index[
-                    (index[f"{args.subset}"]) & (index["split"] == args.split)
-                ]
+                index = index[(index[f"{args.subset}"]) & (index["split"] == args.split)]
                 split = args.subset
         else:
             index = index[index["split"] == args.split]
@@ -666,9 +640,7 @@ if __name__ == "__main__":
             "cluster_id": Value("string"),
             "pdb_id": Value("string"),
             # store res id because we keep pinder numbering for uniprot mapping
-            "complex": ProteinAtomArrayFeature(
-                residue_dictionary=protein_dict, with_res_id=True
-            ),
+            "complex": ProteinAtomArrayFeature(residue_dictionary=protein_dict, with_res_id=True),
             "apo_receptor": ProteinAtomArrayFeature(
                 residue_dictionary=protein_dict, with_res_id=True
             ),
@@ -709,9 +681,7 @@ if __name__ == "__main__":
             index_list = [index]
         else:
             shard_size = math.ceil(len(index) / args.num_proc)
-            index_list = [
-                index.iloc[i : i + shard_size] for i in range(0, len(index), shard_size)
-            ]
+            index_list = [index.iloc[i : i + shard_size] for i in range(0, len(index), shard_size)]
         print(f"Index list length: {len(index_list)} {[len(df) for df in index_list]}")
         dataset = Dataset.from_generator(
             examples_generator,
