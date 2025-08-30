@@ -28,7 +28,7 @@ First off: **Thank you** for considering a contribution to **datasets-bio**!
 7. Install pre-commit hooks:
    ```bash
    pre-commit install
-    ```
+   ```
 
 You are now ready to create a branch and start making commits! When ready, push your branch to your
 fork and open a pull request against the main repository.
