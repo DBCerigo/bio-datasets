@@ -1,3 +1,5 @@
+poetry.lock
+
 # Chemical Component Dictionary (CCD) processed files
 src/bio_datasets/structure/library/cc-counts.tdd
 src/bio_datasets/structure/library/ccd_residue_dictionary.json
