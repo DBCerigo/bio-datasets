@@ -12,7 +12,7 @@ First off: **Thank you** for considering a contribution to **datasets-bio**!
       https://python-poetry.org/docs/
     - Then, run:
     ```bash
-    poetry install
+    poetry install --with dev
     ```
 5. Build and cache local chemistry reference data from the PDB Chemical Component Dictionary (CCD):
     ```bash
