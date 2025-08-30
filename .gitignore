@@ -1,3 +1,9 @@
+# Chemical Component Dictionary (CCD) processed files
+src/bio_datasets/structure/library/cc-counts.tdd
+src/bio_datasets/structure/library/ccd_residue_dictionary.json
+src/bio_datasets/structure/library/components.bcif
+src/bio_datasets/structure/pdbx/encoding.c
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
