@@ -74,7 +74,10 @@ ignore = [
   "D104",  # missing docstring in package __init__
   "D105",  # missing docstring in magic method
   "D107",  # missing docstring in __init__
-  "N806", # variable in function should be lowercase
+  "N806",  # variable in function should be lowercase
+  "B904",  # `raise` rules within `except` blocks
+  "C901",  # complexity
+  "F403", # 'from module import *' used; unable to detect undefined names
 ]
 
 [tool.ruff.lint.pydocstyle]
